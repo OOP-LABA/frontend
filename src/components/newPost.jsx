@@ -4,6 +4,15 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Badge, Button, Container, Group, Image, Modal, NumberInput, Paper, Select, Text, Textarea, TextInput, Title } from '@mantine/core';
 import api from '../axios.js';
+import {
+  formatCategory,
+  formatCity,
+  formatDateTime,
+  formatDepositStatus,
+  formatNumber,
+  formatOffersCount,
+  formatStatus,
+} from '../i18n.js';
 
 export default function NewPost() {
     const { postId } = useParams();
@@ -57,7 +66,7 @@ export default function NewPost() {
           setStatus('succeeded');
         } catch (error) {
           console.error('Error fetching posts:', error);
-          setPageError(error?.response?.data?.message || 'Failed to load task');
+          setPageError(error?.response?.data?.message || 'Не удалось загрузить задание');
           setStatus('failed');
         }
       };
@@ -85,14 +94,12 @@ export default function NewPost() {
 
     const budgetLabel = useMemo(() => {
       if (!post) return '';
-      const budget = Number(post.goal) || 0;
-      return budget.toLocaleString(undefined, { maximumFractionDigits: 0 });
+      return formatNumber(post.goal);
     }, [post]);
 
     const depositLabel = useMemo(() => {
       if (!post) return '';
-      const amount = Number(post.depositAmount) || 0;
-      return amount.toLocaleString(undefined, { maximumFractionDigits: 0 });
+      return formatNumber(post.depositAmount);
     }, [post]);
 
     const handleCopyContact = async () => {
@@ -114,7 +121,7 @@ export default function NewPost() {
     }, [post]);
 
     const categoryOptions = useMemo(
-      () => categories.map((c) => ({ value: c.name, label: c.name })),
+      () => categories.map((c) => ({ value: c.name, label: formatCategory(c.name) })),
       [categories]
     );
 
@@ -133,7 +140,7 @@ export default function NewPost() {
         setOfferText('');
         await refreshTask();
       } catch (e) {
-        const message = e?.response?.data?.message || 'Failed to send offer';
+        const message = e?.response?.data?.message || 'Не удалось отправить отклик';
         setOfferError(message);
       } finally {
         setSendingOffer(false);
@@ -165,18 +172,18 @@ export default function NewPost() {
         await refreshTask();
         setEditState({ saving: false, error: '' });
       } catch (e) {
-        const message = e?.response?.data?.message || 'Failed to update task';
+        const message = e?.response?.data?.message || 'Не удалось обновить задание';
         setEditState({ saving: false, error: message });
       }
     };
 
     const handleDeleteTask = async () => {
-      if (!window.confirm('Delete this task?')) return;
+      if (!window.confirm('Удалить это задание?')) return;
       try {
         await api.delete(`posts/${postId}`);
         navigate('/posts');
       } catch (e) {
-        alert(e?.response?.data?.message || 'Failed to delete task');
+        alert(e?.response?.data?.message || 'Не удалось удалить задание');
       }
     };
 
@@ -199,7 +206,7 @@ export default function NewPost() {
         await refreshTask();
         setAcceptState({ sending: false, error: '' });
       } catch (e) {
-        const message = e?.response?.data?.message || 'Failed to accept offer';
+        const message = e?.response?.data?.message || 'Не удалось принять отклик';
         setAcceptState({ sending: false, error: message });
       }
     };
@@ -209,7 +216,7 @@ export default function NewPost() {
         await api.patch(`posts/${postId}/status`, { status: newStatus });
         await refreshTask();
       } catch (e) {
-        alert(e?.response?.data?.message || 'Failed to update status');
+        alert(e?.response?.data?.message || 'Не удалось обновить статус');
       }
     };
 
@@ -220,11 +227,11 @@ export default function NewPost() {
           rating: Number(reviewRating) || 5,
           content: reviewContent,
         });
-        setReviewState({ sending: false, error: '', ok: 'Review sent!' });
+        setReviewState({ sending: false, error: '', ok: 'Отзыв отправлен!' });
         setReviewOpened(false);
         setReviewContent('');
       } catch (e) {
-        const message = e?.response?.data?.message || 'Failed to send review';
+        const message = e?.response?.data?.message || 'Не удалось отправить отзыв';
         setReviewState({ sending: false, error: message, ok: '' });
       }
     };
@@ -235,31 +242,31 @@ export default function NewPost() {
       try {
         setReportState({ sending: true, error: '', ok: '' });
         await api.post('complaints', { reason, targetPostId: Number(postId) });
-        setReportState({ sending: false, error: '', ok: 'Complaint submitted!' });
+        setReportState({ sending: false, error: '', ok: 'Жалоба отправлена!' });
         setReportOpened(false);
         setReportReason('');
       } catch (e) {
-        const message = e?.response?.data?.message || 'Failed to submit complaint';
+        const message = e?.response?.data?.message || 'Не удалось отправить жалобу';
         setReportState({ sending: false, error: message, ok: '' });
       }
     };
 
-    if (status === 'loading') return <div>Loading...</div>;
-    if (status === 'failed') return <div>{pageError || 'Failed to load task.'}</div>;
-    if (!post) return <div>Task not found.</div>;
+    if (status === 'loading') return <div>Загрузка...</div>;
+    if (status === 'failed') return <div>{pageError || 'Не удалось загрузить задание.'}</div>;
+    if (!post) return <div>Задание не найдено.</div>;
 
     return (
         <>
         <Header />
-        <Modal opened={editOpened} onClose={() => setEditOpened(false)} title="Edit task" centered>
+        <Modal opened={editOpened} onClose={() => setEditOpened(false)} title="Редактировать задание" centered>
           <TextInput
-            label="Task title"
+            label="Название задания"
             mt="sm"
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
           />
           <Textarea
-            label="Description"
+            label="Описание"
             mt="sm"
             minRows={4}
             value={editContent}
@@ -267,8 +274,8 @@ export default function NewPost() {
           />
           {categoryOptions.length > 0 ? (
             <Select
-              label="Subject"
-              placeholder="Pick a subject"
+              label="Предмет"
+              placeholder="Выберите предмет"
               mt="sm"
               data={categoryOptions}
               searchable
@@ -279,15 +286,15 @@ export default function NewPost() {
             />
           ) : (
             <TextInput
-              label="Subject"
-              placeholder="e.g. Math / Programming / English"
+              label="Предмет"
+              placeholder="Например: математика / программирование / английский"
               mt="sm"
               value={editCategory ?? ''}
               onChange={(e) => setEditCategory(e.target.value)}
             />
           )}
           <NumberInput
-            label="Budget"
+            label="Бюджет"
             mt="sm"
             min={0}
             allowNegative={false}
@@ -296,7 +303,7 @@ export default function NewPost() {
             onChange={setEditBudget}
           />
           <TextInput
-            label="Contact"
+            label="Контакт"
             mt="sm"
             maxLength={35}
             value={editContact}
@@ -304,19 +311,19 @@ export default function NewPost() {
           />
           {editState.error && <Text c="red" size="sm" mt="sm">{editState.error}</Text>}
           <Group justify="flex-end" mt="md">
-            <Button variant="default" onClick={() => setEditOpened(false)}>Cancel</Button>
+            <Button variant="default" onClick={() => setEditOpened(false)}>Отмена</Button>
             <Button color="violet" onClick={handleSaveEdit} loading={editState.saving}>
-              Save
+              Сохранить
             </Button>
           </Group>
         </Modal>
 
-        <Modal opened={acceptOpened} onClose={() => setAcceptOpened(false)} title="Accept offer" centered>
+        <Modal opened={acceptOpened} onClose={() => setAcceptOpened(false)} title="Принять отклик" centered>
           <Text size="sm" c="dimmed">
-            Choose deposit amount to hold for this task. This is a simplified “escrow” record in the DB.
+            Укажите сумму депозита, которая будет удержана за это задание.
           </Text>
           <NumberInput
-            label="Deposit amount"
+            label="Сумма депозита"
             mt="sm"
             min={0}
             allowNegative={false}
@@ -326,16 +333,16 @@ export default function NewPost() {
           />
           {acceptState.error && <Text c="red" size="sm" mt="sm">{acceptState.error}</Text>}
           <Group justify="flex-end" mt="md">
-            <Button variant="default" onClick={() => setAcceptOpened(false)}>Cancel</Button>
+            <Button variant="default" onClick={() => setAcceptOpened(false)}>Отмена</Button>
             <Button color="violet" onClick={handleAcceptOffer} loading={acceptState.sending}>
-              Accept
+              Принять
             </Button>
           </Group>
         </Modal>
 
-        <Modal opened={reviewOpened} onClose={() => setReviewOpened(false)} title="Leave a review" centered>
+        <Modal opened={reviewOpened} onClose={() => setReviewOpened(false)} title="Оставить отзыв" centered>
           <NumberInput
-            label="Rating (1–5)"
+            label="Оценка (1-5)"
             mt="sm"
             min={1}
             max={5}
@@ -343,8 +350,8 @@ export default function NewPost() {
             onChange={setReviewRating}
           />
           <Textarea
-            label="Comment (optional)"
-            placeholder="What was good / what to improve"
+            label="Комментарий (необязательно)"
+            placeholder="Что понравилось и что можно улучшить"
             mt="sm"
             minRows={4}
             value={reviewContent}
@@ -352,26 +359,26 @@ export default function NewPost() {
           />
           {reviewState.error && <Text c="red" size="sm" mt="sm">{reviewState.error}</Text>}
           <Group justify="flex-end" mt="md">
-            <Button variant="default" onClick={() => setReviewOpened(false)}>Cancel</Button>
+            <Button variant="default" onClick={() => setReviewOpened(false)}>Отмена</Button>
             <Button color="violet" onClick={handleLeaveReview} loading={reviewState.sending}>
-              Submit
+              Отправить
             </Button>
           </Group>
         </Modal>
 
-        <Modal opened={reportOpened} onClose={() => setReportOpened(false)} title="Report task" centered>
+        <Modal opened={reportOpened} onClose={() => setReportOpened(false)} title="Пожаловаться на задание" centered>
           <Textarea
-            label="Reason"
-            placeholder="Describe what happened"
+            label="Причина"
+            placeholder="Опишите, что произошло"
             minRows={4}
             value={reportReason}
             onChange={(e) => setReportReason(e.target.value)}
           />
           {reportState.error && <Text c="red" size="sm" mt="sm">{reportState.error}</Text>}
           <Group justify="flex-end" mt="md">
-            <Button variant="default" onClick={() => setReportOpened(false)}>Cancel</Button>
+            <Button variant="default" onClick={() => setReportOpened(false)}>Отмена</Button>
             <Button color="violet" onClick={handleReportTask} loading={reportState.sending} disabled={!reportReason.trim()}>
-              Submit
+              Отправить
             </Button>
           </Group>
         </Modal>
@@ -381,7 +388,7 @@ export default function NewPost() {
             <Group align="flex-start" gap="xl" className="taskLayout">
               <Image
                 src={post.avatar}
-                alt="Task attachment"
+                alt="Вложение к заданию"
                 radius="md"
                 className="taskImage"
                 fallbackSrc="/task-placeholder.svg"
@@ -392,30 +399,30 @@ export default function NewPost() {
                   <div>
                     <Title order={2} className="taskTitle">{post.title}</Title>
                     <Text c="dimmed" size="sm" mt={4}>
-                      Budget: <span className="taskBudget">{budgetLabel}</span>
+                      Бюджет: <span className="taskBudget">{budgetLabel}</span>
                     </Text>
                     <Text c="dimmed" size="sm" mt={4}>
-                      Posted by{' '}
+                      Автор:{' '}
                       {post.authorUsername ? (
                         <Link to={`/profiles/${post.authorUsername}`} className="inlineLink">
                           {post.authorUsername}
                         </Link>
                       ) : (
-                        'unknown'
+                        'неизвестно'
                       )}
-                      {post.authorCity ? ` · ${post.authorCity}` : ''}
+                      {post.authorCity ? ` · ${formatCity(post.authorCity)}` : ''}
                     </Text>
                   </div>
 
                   <Group gap="xs">
                     {post.category && (
                       <Badge variant="light" color="violet">
-                        {post.category}
+                        {formatCategory(post.category)}
                       </Badge>
                     )}
                     {post.status && (
                       <Badge variant="light" color="gray">
-                        {String(post.status).replace(/_/g, ' ')}
+                        {formatStatus(post.status)}
                       </Badge>
                     )}
                   </Group>
@@ -424,7 +431,7 @@ export default function NewPost() {
                 <Group gap="sm" mt="md" wrap="wrap">
                   {post.executorUsername && (
                     <Badge variant="light" color="teal">
-                      Executor:{' '}
+                      Исполнитель:{' '}
                       <Link to={`/profiles/${post.executorUsername}`} className="inlineLink">
                         {post.executorUsername}
                       </Link>
@@ -432,21 +439,21 @@ export default function NewPost() {
                   )}
                   {post.depositStatus && (
                     <Badge variant="light" color="orange">
-                      Deposit: {depositLabel} ({post.depositStatus})
+                      Депозит: {depositLabel} ({formatDepositStatus(post.depositStatus)})
                     </Badge>
                   )}
                   {isLoggedIn && (
                     <Button variant="default" color="gray" onClick={() => setReportOpened(true)}>
-                      Report
+                      Пожаловаться
                     </Button>
                   )}
                   {canManage && (
                     <>
                       <Button variant="light" color="violet" onClick={openEdit} disabled={!isAdmin && post.status !== 'OPEN'}>
-                        Edit
+                        Редактировать
                       </Button>
                       <Button variant="default" color="red" onClick={handleDeleteTask} disabled={!isAdmin && post.status !== 'OPEN'}>
-                        Delete
+                        Удалить
                       </Button>
                     </>
                   )}
@@ -455,12 +462,12 @@ export default function NewPost() {
                 <Group gap="sm" mt="sm" wrap="wrap">
                   {(isOwner || isExecutor || isAdmin) && post.status === 'IN_PROGRESS' && (
                     <Button variant="light" color="teal" onClick={() => handleSetStatus('DONE')}>
-                      Mark as done
+                      Отметить выполненным
                     </Button>
                   )}
                   {(isOwner || isAdmin) && post.status !== 'DONE' && post.status !== 'CANCELLED' && (
                     <Button variant="default" color="gray" onClick={() => handleSetStatus('CANCELLED')}>
-                      Cancel task
+                      Отменить задание
                     </Button>
                   )}
                 </Group>
@@ -470,7 +477,7 @@ export default function NewPost() {
                 </Text>
 
                 <Paper withBorder radius="md" p="md" mt="lg" className="taskContact">
-                  <Text size="sm" c="dimmed">Contact</Text>
+                  <Text size="sm" c="dimmed">Контакт</Text>
                   <Group justify="space-between" align="center" mt={6}>
                     <Text fw={600}>{post.accountDetails}</Text>
                     <Button
@@ -479,27 +486,27 @@ export default function NewPost() {
                       onClick={handleCopyContact}
                       disabled={copyState === 'copying'}
                     >
-                      {copyState === 'copied' ? 'Copied' : 'Copy'}
+                      {copyState === 'copied' ? 'Скопировано' : 'Копировать'}
                     </Button>
                   </Group>
                 </Paper>
 
                 <Paper withBorder radius="md" p="md" mt="lg" className="offersSection">
                   <Group justify="space-between" align="center">
-                    <Text fw={800}>Offers</Text>
-                    <Text size="sm" c="dimmed">{offers.length} total</Text>
+                    <Text fw={800}>Отклики</Text>
+                    <Text size="sm" c="dimmed">{formatOffersCount(offers.length)}</Text>
                   </Group>
 
                   {offers.length === 0 ? (
                     <Text c="dimmed" size="sm" mt="sm">
-                      No offers yet. Be the first to respond.
+                      Откликов пока нет. Вы можете быть первым.
                     </Text>
                   ) : (
                     <div className="offersList">
                       {offers.map((offer, idx) => {
                         const authorName =
-                          [offer.firstName, offer.secondName].filter(Boolean).join(' ') || offer.username || 'Student';
-                        const date = offer.createdAt ? new Date(offer.createdAt).toLocaleString() : '';
+                          [offer.firstName, offer.secondName].filter(Boolean).join(' ') || offer.username || 'Студент';
+                        const date = formatDateTime(offer.createdAt);
                         return (
                           <Paper key={offer.id ?? `${offer.createdAt ?? idx}-${idx}`} withBorder radius="md" p="sm" className="offerCard">
                             <Group justify="space-between" align="center">
@@ -521,7 +528,7 @@ export default function NewPost() {
                             {isOwner && post.status === 'OPEN' && offer.id && (
                               <Group justify="flex-end" mt="sm">
                                 <Button color="violet" variant="light" onClick={() => openAccept(offer)}>
-                                  Accept offer
+                                  Принять отклик
                                 </Button>
                               </Group>
                             )}
@@ -533,21 +540,21 @@ export default function NewPost() {
 
                   {!isLoggedIn ? (
                     <Text size="sm" c="dimmed" mt="md">
-                      <Link to="/signin">Sign in</Link> to send an offer.
+                      <Link to="/signin">Войдите</Link>, чтобы отправить отклик.
                     </Text>
                   ) : isOwner ? (
                     <Text size="sm" c="dimmed" mt="md">
-                      You can’t send offers to your own task.
+                      Нельзя отправлять отклик на свое задание.
                     </Text>
                   ) : post.status !== 'OPEN' ? (
                     <Text size="sm" c="dimmed" mt="md">
-                      Offers are closed for this task.
+                      Отклики на это задание закрыты.
                     </Text>
                   ) : (
                     <div className="offerForm">
                       <Textarea
-                        label="Send an offer"
-                        placeholder="Describe how you’ll solve it, ETA, and your price if different from budget."
+                        label="Отправить отклик"
+                        placeholder="Опишите, как вы решите задачу, сроки и свою цену, если она отличается от бюджета."
                         mt="md"
                         minRows={3}
                         value={offerText}
@@ -564,7 +571,7 @@ export default function NewPost() {
                           loading={sendingOffer}
                           disabled={!offerText.trim()}
                         >
-                          Send offer
+                          Отправить отклик
                         </Button>
                       </Group>
                     </div>
@@ -575,13 +582,13 @@ export default function NewPost() {
                   <Paper withBorder radius="md" p="md" mt="lg" className="offersSection">
                     <Group justify="space-between" align="center">
                       <div>
-                        <Text fw={800}>Review</Text>
+                        <Text fw={800}>Отзыв</Text>
                         <Text size="sm" c="dimmed">
-                          Leave a rating for the other side of this task.
+                          Оставьте оценку второй стороне этого задания.
                         </Text>
                       </div>
                       <Button color="violet" variant="light" onClick={() => setReviewOpened(true)}>
-                        Leave review
+                        Оставить отзыв
                       </Button>
                     </Group>
                   </Paper>

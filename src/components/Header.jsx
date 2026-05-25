@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import logo from '../assets/Artboard 1@3x.png';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Autocomplete, Button, FileInput, Group, Modal, NumberInput, TextInput, Textarea } from '@mantine/core';
+import { Button, FileInput, Group, Modal, NumberInput, Select, TextInput, Textarea } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { logout, post } from '../slices/appSlice.js';
 import api from '../axios.js';
+import { formatCategory } from '../i18n.js';
 export default function Header() {
     const user = useSelector(state => state.app.user);
     const isLoggedIn = useSelector(state => state.app.isLoggedIn);
@@ -25,7 +26,9 @@ export default function Header() {
 
     const categoryOptions = useMemo(() => {
       const options = categories.map((c) => c.name).filter(Boolean);
-      return Array.from(new Set(options)).sort((a, b) => String(a).localeCompare(String(b)));
+      return Array.from(new Set(options))
+        .sort((a, b) => String(a).localeCompare(String(b)))
+        .map((name) => ({ value: name, label: formatCategory(name) }));
     }, [categories]);
 
     useEffect(() => {
@@ -90,15 +93,15 @@ export default function Header() {
 
     const handlePost = async () => {
         if (!title.trim()) {
-          alert('Please enter a task title');
+          alert('Введите название задания');
           return;
         }
         if (!category.trim()) {
-          alert('Please enter a subject');
+          alert('Выберите предмет или категорию');
           return;
         }
         if (!details.trim()) {
-          alert('Please add contact details (Telegram/Discord/email)');
+          alert('Добавьте контакт для связи: Telegram, Discord или почту');
           return;
         }
 
@@ -114,7 +117,7 @@ export default function Header() {
         );
 
         if (response.type === 'app/post/rejected') {
-          alert(response.payload?.message || 'Failed to create task');
+          alert(response.payload?.message || 'Не удалось создать задание');
           return;
         }
 
@@ -123,37 +126,48 @@ export default function Header() {
     }
     return (
         <>
-            <Modal opened={opened} onClose={close} title="Post a task" centered>
+            <Modal opened={opened} onClose={close} title="Опубликовать задание" centered>
                 <TextInput
-                  label="Task title"
-                  placeholder="e.g. Solve calculus worksheet #3"
+                  label="Название задания"
+                  placeholder="Например: решить контрольную по математике"
                   mt="sm"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
 
                 <Textarea
-                  label="Description"
-                  placeholder="What needs to be done? Deadline? Formatting requirements?"
+                  label="Описание"
+                  placeholder="Что нужно сделать? Какой дедлайн? Есть ли требования к оформлению?"
                   mt="sm"
                   minRows={4}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                 />
 
-                <Autocomplete
-                  label="Subject"
-                  placeholder="e.g. Math / Programming / English"
-                  mt="sm"
-                  data={categoryOptions}
-                  value={category}
-                  onChange={setCategory}
-                  comboboxProps={{ withinPortal: false }}
-                />
+                {categoryOptions.length > 0 ? (
+                  <Select
+                    label="Предмет"
+                    placeholder="Выберите предмет"
+                    mt="sm"
+                    data={categoryOptions}
+                    searchable
+                    value={category}
+                    onChange={(value) => setCategory(value || '')}
+                    comboboxProps={{ withinPortal: false }}
+                  />
+                ) : (
+                  <TextInput
+                    label="Предмет"
+                    placeholder="Например: математика / программирование / английский"
+                    mt="sm"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                  />
+                )}
 
                 <NumberInput
-                  label="Budget"
-                  placeholder="e.g. 1500"
+                  label="Бюджет"
+                  placeholder="Например: 1500"
                   mt="sm"
                   min={0}
                   allowNegative={false}
@@ -163,9 +177,9 @@ export default function Header() {
                 />
 
                 <TextInput
-                  label="Contact"
-                  description="Telegram/Discord/email (max 35 chars)"
-                  placeholder="@yourhandle"
+                  label="Контакт"
+                  description="Telegram, Discord или почта, до 35 символов"
+                  placeholder="@username"
                   mt="sm"
                   maxLength={35}
                   value={details}
@@ -174,17 +188,17 @@ export default function Header() {
 
                 <FileInput
                   accept="image/png,image/jpeg"
-                  label="Attachment (optional)"
-                  description="Screenshot of the task / requirements"
-                  placeholder="Upload image"
+                  label="Вложение (необязательно)"
+                  description="Скриншот задания или требований"
+                  placeholder="Загрузить изображение"
                   mt="sm"
                   onChange={handleFileChange}
                   value={file}
                 />
 
                 <Group justify="flex-end" mt="md">
-                  <Button variant="default" onClick={close}>Cancel</Button>
-                  <Button onClick={handlePost} color='violet'>Publish</Button>
+                  <Button variant="default" onClick={close}>Отмена</Button>
+                  <Button onClick={handlePost} color='violet'>Опубликовать</Button>
                 </Group>
             </Modal>
             <div className='header'>
@@ -194,43 +208,43 @@ export default function Header() {
                 </Link>
                 <div className='texts'>
                     <button type="button" className='link linkButton' onClick={handleOpenCreate}>
-                        <span className='perexod'>POST A TASK</span>
+                        <span className='perexod'>СОЗДАТЬ</span>
                     </button>
                     <Link style={{ textDecoration: 'none' }} to={"/posts"}>
                         <div className='link'>
                             <span className='perexod'>
-                                BROWSE TASKS
+                                ЗАДАНИЯ
                             </span>
                         </div>
                     </Link>
                     {isLoggedIn && (
                       <Link style={{ textDecoration: 'none' }} to={"/dashboard"}>
                         <div className='link'>
-                          <span className='perexod'>DASHBOARD</span>
+                          <span className='perexod'>КАБИНЕТ</span>
                         </div>
                       </Link>
                     )}
                     {isLoggedIn && (
                       <Link style={{ textDecoration: 'none' }} to={"/profile"}>
                         <div className='link'>
-                          <span className='perexod'>PROFILE</span>
+                          <span className='perexod'>ПРОФИЛЬ</span>
                         </div>
                       </Link>
                     )}
                     {isLoggedIn && isAdmin && (
                       <Link style={{ textDecoration: 'none' }} to={"/admin"}>
                         <div className='link'>
-                          <span className='perexod'>ADMIN</span>
+                          <span className='perexod'>АДМИН</span>
                         </div>
                       </Link>
                     )}
                     {!isLoggedIn &&
                         <div className='signs'>
                             <Link to={`/signup`} style={{ textDecoration: 'none' }}>
-                              <Button variant="filled" color="violet" size="md">SIGN UP</Button>
+                              <Button variant="filled" color="violet" size="md">Регистрация</Button>
                             </Link>
                             <Link to={`/signin`} style={{ textDecoration: 'none' }}>
-                              <Button variant="default" color="gray" style={{ marginLeft: '8px' }}>SIGN IN</Button>
+                              <Button variant="default" color="gray" style={{ marginLeft: '8px' }}>Войти</Button>
                             </Link>
                         </div>
                     }
@@ -244,7 +258,7 @@ export default function Header() {
                               style={{ marginLeft: '10px' }}
                               onClick={handleLogout}
                             >
-                              SIGN OUT
+                              Выйти
                             </Button>
                         </div>
                     }

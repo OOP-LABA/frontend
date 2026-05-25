@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDebouncedValue } from '@mantine/hooks';
 import api from '../axios.js';
+import { formatCategory, formatNumber, formatStatus } from '../i18n.js';
 export default function Posts(){
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,10 +17,7 @@ export default function Posts(){
     const [maxBudget, setMaxBudget] = useState(null);
     const [sort, setSort] = useState('newest');
 
-    const formatBudget = (value) => {
-      const budget = Number(value) || 0;
-      return budget.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    };
+    const formatBudget = (value) => formatNumber(value);
 
     useEffect(() => {
       let mounted = true;
@@ -74,7 +72,7 @@ export default function Posts(){
       const fromApi = categories.map((c) => c.name).filter(Boolean);
       const unique = Array.from(new Set(fromApi));
       unique.sort((a, b) => String(a).localeCompare(String(b)));
-      return unique.map((name) => ({ value: name, label: name }));
+      return unique.map((name) => ({ value: name, label: formatCategory(name) }));
     }, [categories]);
 
     const statusColor = (value) => {
@@ -99,16 +97,16 @@ export default function Posts(){
             <Paper withBorder radius="lg" p="md" className="postsToolbar">
               <Group gap="sm" align="flex-end" wrap="wrap">
                 <TextInput
-                  label="Search"
-                  placeholder="Title or description"
+                  label="Поиск"
+                  placeholder="Название или описание"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="postsSearch"
                 />
 
                 <Select
-                  label="Subject"
-                  placeholder="All"
+                  label="Предмет"
+                  placeholder="Все"
                   data={categoryOptions}
                   searchable
                   clearable
@@ -118,7 +116,7 @@ export default function Posts(){
                 />
 
                 <NumberInput
-                  label="Min budget"
+                  label="Бюджет от"
                   placeholder="0"
                   min={0}
                   allowNegative={false}
@@ -128,8 +126,8 @@ export default function Posts(){
                 />
 
                 <NumberInput
-                  label="Max budget"
-                  placeholder="Any"
+                  label="Бюджет до"
+                  placeholder="Любой"
                   min={0}
                   allowNegative={false}
                   thousandSeparator=","
@@ -138,11 +136,11 @@ export default function Posts(){
                 />
 
                 <Select
-                  label="Sort"
+                  label="Сортировка"
                   data={[
-                    { value: 'newest', label: 'Newest' },
-                    { value: 'budget_desc', label: 'Budget: high to low' },
-                    { value: 'budget_asc', label: 'Budget: low to high' },
+                    { value: 'newest', label: 'Сначала новые' },
+                    { value: 'budget_desc', label: 'Бюджет: по убыванию' },
+                    { value: 'budget_asc', label: 'Бюджет: по возрастанию' },
                   ]}
                   value={sort}
                   onChange={(v) => setSort(v || 'newest')}
@@ -152,9 +150,9 @@ export default function Posts(){
             </Paper>
 
             {loading ? (
-              <Text c="dimmed" mt="md">Loading tasks…</Text>
+              <Text c="dimmed" mt="md">Загружаем задания...</Text>
             ) : posts.length === 0 ? (
-              <Text c="dimmed" mt="md">No tasks match your filters.</Text>
+              <Text c="dimmed" mt="md">По этим фильтрам заданий нет.</Text>
             ) : (
               <Grid justify="space-around" align="flex-start" mt="md">
                 {posts.map(post => (
@@ -164,7 +162,7 @@ export default function Posts(){
                         <Image
                           src={post.avatar}
                           height={160}
-                          alt="Task attachment"
+                          alt="Вложение к заданию"
                           fallbackSrc="/task-placeholder.svg"
                         />
                       </Card.Section>
@@ -174,12 +172,12 @@ export default function Posts(){
                         <Group gap={6}>
                           {post.category && (
                             <Badge variant="light" color="violet">
-                              {post.category}
+                              {formatCategory(post.category)}
                             </Badge>
                           )}
                           {post.status && (
                             <Badge variant="light" color={statusColor(post.status)}>
-                              {String(post.status).replace(/_/g, ' ')}
+                              {formatStatus(post.status)}
                             </Badge>
                           )}
                         </Group>
@@ -189,12 +187,12 @@ export default function Posts(){
                         {post.content}
                       </Text>
                       <Group justify="space-between" mt="md">
-                        <Text size="sm" c="dimmed">Budget</Text>
+                        <Text size="sm" c="dimmed">Бюджет</Text>
                         <Text fw={700}>{formatBudget(post.goal)}</Text>
                       </Group>
                       <Link to={`/posts/${post.id}`}>
                         <Button color="violet" fullWidth mt="md" radius="md">
-                          Open task
+                          Открыть задание
                         </Button>
                       </Link>
                     </Card>

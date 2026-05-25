@@ -5,6 +5,7 @@ import Header from './Header';
 import AuthenticationTitle from './Auth.jsx';
 import api from '../axios.js';
 import { Link } from 'react-router-dom';
+import { formatCity, formatRole, formatStatus } from '../i18n.js';
 
 export default function Admin() {
   const isLoggedIn = useSelector(state => state.app.isLoggedIn);
@@ -42,7 +43,7 @@ export default function Admin() {
       const res = await api.get('admin/users');
       setUsers(Array.isArray(res.data) ? res.data : []);
     } catch (e) {
-      setUsersError(e?.response?.data?.message || 'Failed to load users');
+      setUsersError(e?.response?.data?.message || 'Не удалось загрузить пользователей');
       setUsers([]);
     } finally {
       setUsersLoading(false);
@@ -60,7 +61,7 @@ export default function Admin() {
       const res = await api.get('admin/complaints', { params });
       setComplaints(Array.isArray(res.data) ? res.data : []);
     } catch (e) {
-      setComplaintsError(e?.response?.data?.message || 'Failed to load complaints');
+      setComplaintsError(e?.response?.data?.message || 'Не удалось загрузить жалобы');
       setComplaints([]);
     } finally {
       setComplaintsLoading(false);
@@ -100,17 +101,17 @@ export default function Admin() {
       await fetchUsers();
       setBanState({ saving: false, error: '' });
     } catch (e) {
-      setBanState({ saving: false, error: e?.response?.data?.message || 'Failed to ban user' });
+      setBanState({ saving: false, error: e?.response?.data?.message || 'Не удалось заблокировать пользователя' });
     }
   };
 
   const handleUnban = async (username) => {
-    if (!window.confirm(`Unban ${username}?`)) return;
+    if (!window.confirm(`Разблокировать ${username}?`)) return;
     try {
       await api.post(`admin/users/${username}/unban`);
       await fetchUsers();
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to unban user');
+      alert(e?.response?.data?.message || 'Не удалось разблокировать пользователя');
     }
   };
 
@@ -139,18 +140,18 @@ export default function Admin() {
       await fetchUsers();
       setResolveState({ saving: false, error: '' });
     } catch (e) {
-      setResolveState({ saving: false, error: e?.response?.data?.message || 'Failed to resolve complaint' });
+      setResolveState({ saving: false, error: e?.response?.data?.message || 'Не удалось обработать жалобу' });
     }
   };
 
   const handleDeletePost = async (postId) => {
     if (!postId) return;
-    if (!window.confirm(`Delete task #${postId}?`)) return;
+    if (!window.confirm(`Удалить задание #${postId}?`)) return;
     try {
       await api.delete(`admin/posts/${postId}`);
       await fetchComplaints();
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to delete task');
+      alert(e?.response?.data?.message || 'Не удалось удалить задание');
     }
   };
 
@@ -173,35 +174,35 @@ export default function Admin() {
     <>
       <Header />
 
-      <Modal opened={banOpened} onClose={() => setBanOpened(false)} title={`Ban user: ${banUsername}`} centered>
+      <Modal opened={banOpened} onClose={() => setBanOpened(false)} title={`Заблокировать пользователя: ${banUsername}`} centered>
         <TextInput
-          label="Reason"
-          placeholder="Optional"
+          label="Причина"
+          placeholder="Необязательно"
           value={banReason}
           onChange={(e) => setBanReason(e.target.value)}
         />
         {banState.error && <Text c="red" size="sm" mt="sm">{banState.error}</Text>}
         <Group justify="flex-end" mt="md">
-          <Button variant="default" onClick={() => setBanOpened(false)}>Cancel</Button>
+          <Button variant="default" onClick={() => setBanOpened(false)}>Отмена</Button>
           <Button color="red" onClick={handleBan} loading={banState.saving}>
-            Ban
+            Заблокировать
           </Button>
         </Group>
       </Modal>
 
-      <Modal opened={resolveOpened} onClose={() => setResolveOpened(false)} title={`Resolve complaint #${resolveComplaint?.id ?? ''}`} centered>
+      <Modal opened={resolveOpened} onClose={() => setResolveOpened(false)} title={`Обработать жалобу #${resolveComplaint?.id ?? ''}`} centered>
         <Select
-          label="Status"
+          label="Статус"
           data={[
-            { value: 'RESOLVED', label: 'RESOLVED' },
-            { value: 'REJECTED', label: 'REJECTED' },
+            { value: 'RESOLVED', label: formatStatus('RESOLVED') },
+            { value: 'REJECTED', label: formatStatus('REJECTED') },
           ]}
           value={resolveStatus}
           onChange={(v) => setResolveStatus(v || 'RESOLVED')}
           comboboxProps={{ withinPortal: false }}
         />
         <Textarea
-          label="Admin note"
+          label="Заметка администратора"
           mt="sm"
           minRows={3}
           value={resolveNote}
@@ -209,24 +210,24 @@ export default function Admin() {
         />
         <Checkbox
           mt="sm"
-          label="Ban user as part of resolution"
+          label="Заблокировать пользователя по итогам жалобы"
           checked={resolveBanUser}
           onChange={(e) => setResolveBanUser(e.currentTarget.checked)}
         />
         {resolveBanUser && (
           <TextInput
             mt="sm"
-            label="Ban reason"
-            placeholder="Banned by admin"
+            label="Причина блокировки"
+            placeholder="Заблокирован администратором"
             value={resolveBanReason}
             onChange={(e) => setResolveBanReason(e.target.value)}
           />
         )}
         {resolveState.error && <Text c="red" size="sm" mt="sm">{resolveState.error}</Text>}
         <Group justify="flex-end" mt="md">
-          <Button variant="default" onClick={() => setResolveOpened(false)}>Cancel</Button>
+          <Button variant="default" onClick={() => setResolveOpened(false)}>Отмена</Button>
           <Button color="violet" onClick={handleResolve} loading={resolveState.saving}>
-            Save
+            Сохранить
           </Button>
         </Group>
       </Modal>
@@ -234,53 +235,53 @@ export default function Admin() {
       <Container size="lg" className="adminPage">
         <Group justify="space-between" align="flex-end" mb="md">
           <div>
-            <Title order={2}>Admin</Title>
-            <Text c="dimmed" size="sm">Users, bans, complaints, moderation.</Text>
+            <Title order={2}>Админка</Title>
+            <Text c="dimmed" size="sm">Пользователи, блокировки, жалобы и модерация.</Text>
           </div>
           {!isAdmin && (
-            <Badge color="red" variant="light">Not an admin</Badge>
+            <Badge color="red" variant="light">Нет прав администратора</Badge>
           )}
         </Group>
 
         {!isAdmin ? (
           <Paper withBorder radius="lg" p="md" className="adminCard">
-            <Text>You don’t have access to admin tools.</Text>
+            <Text>У вас нет доступа к инструментам администратора.</Text>
           </Paper>
         ) : (
           <Paper withBorder radius="lg" p="md" className="adminCard">
             <Tabs value={tab} onChange={(v) => setTab(v || 'users')}>
               <Tabs.List>
-                <Tabs.Tab value="users">Users</Tabs.Tab>
-                <Tabs.Tab value="complaints">Complaints</Tabs.Tab>
+                <Tabs.Tab value="users">Пользователи</Tabs.Tab>
+                <Tabs.Tab value="complaints">Жалобы</Tabs.Tab>
               </Tabs.List>
 
               <Tabs.Panel value="users" pt="md">
                 <Group justify="space-between" align="flex-end" mb="sm">
                   <TextInput
-                    label="Search"
-                    placeholder="username"
+                    label="Поиск"
+                    placeholder="логин"
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
                     className="adminSearch"
                   />
                   <Button variant="default" onClick={fetchUsers} loading={usersLoading}>
-                    Refresh
+                    Обновить
                   </Button>
                 </Group>
 
                 {usersError && <Text c="red" size="sm">{usersError}</Text>}
                 {usersLoading ? (
-                  <Text c="dimmed">Loading…</Text>
+                  <Text c="dimmed">Загрузка...</Text>
                 ) : (
                   <div className="adminTableWrap">
                     <Table striped highlightOnHover>
                       <Table.Thead>
                         <Table.Tr>
-                          <Table.Th>User</Table.Th>
-                          <Table.Th>Email</Table.Th>
-                          <Table.Th>Roles</Table.Th>
-                          <Table.Th>Status</Table.Th>
-                          <Table.Th>Actions</Table.Th>
+                          <Table.Th>Пользователь</Table.Th>
+                          <Table.Th>Почта</Table.Th>
+                          <Table.Th>Роли</Table.Th>
+                          <Table.Th>Статус</Table.Th>
+                          <Table.Th>Действия</Table.Th>
                         </Table.Tr>
                       </Table.Thead>
                       <Table.Tbody>
@@ -294,7 +295,7 @@ export default function Admin() {
                               </Text>
                               <Text size="xs" c="dimmed">
                                 {[u.firstName, u.secondName].filter(Boolean).join(' ')}
-                                {u.city ? ` · ${u.city}` : ''}
+                                {u.city ? ` · ${formatCity(u.city)}` : ''}
                               </Text>
                             </Table.Td>
                             <Table.Td>
@@ -304,16 +305,16 @@ export default function Admin() {
                               <Group gap={6}>
                                 {(u.roles || []).map((r) => (
                                   <Badge key={r} variant="light" color={r === 'ROLE_ADMIN' ? 'violet' : 'gray'}>
-                                    {r}
+                                    {formatRole(r)}
                                   </Badge>
                                 ))}
                               </Group>
                             </Table.Td>
                             <Table.Td>
                               {u.banned ? (
-                                <Badge color="red" variant="light">BANNED</Badge>
+                                <Badge color="red" variant="light">Заблокирован</Badge>
                               ) : (
-                                <Badge color="green" variant="light">OK</Badge>
+                                <Badge color="green" variant="light">Активен</Badge>
                               )}
                               {u.banned && u.banReason && (
                                 <Text size="xs" c="dimmed" mt={4}>{u.banReason}</Text>
@@ -323,11 +324,11 @@ export default function Admin() {
                               <Group gap="xs">
                                 {u.banned ? (
                                   <Button size="xs" variant="default" onClick={() => handleUnban(u.username)}>
-                                    Unban
+                                    Разблокировать
                                   </Button>
                                 ) : (
                                   <Button size="xs" color="red" variant="light" onClick={() => openBan(u.username)}>
-                                    Ban
+                                    Заблокировать
                                   </Button>
                                 )}
                               </Group>
@@ -343,38 +344,38 @@ export default function Admin() {
               <Tabs.Panel value="complaints" pt="md">
                 <Group justify="space-between" align="flex-end" mb="sm">
                   <Select
-                    label="Status"
+                    label="Статус"
                     data={[
-                      { value: 'ALL', label: 'All' },
-                      { value: 'OPEN', label: 'OPEN' },
-                      { value: 'RESOLVED', label: 'RESOLVED' },
-                      { value: 'REJECTED', label: 'REJECTED' },
+                      { value: 'ALL', label: formatStatus('ALL') },
+                      { value: 'OPEN', label: formatStatus('OPEN') },
+                      { value: 'RESOLVED', label: formatStatus('RESOLVED') },
+                      { value: 'REJECTED', label: formatStatus('REJECTED') },
                     ]}
                     value={complaintsStatus}
                     onChange={(v) => setComplaintsStatus(v || 'OPEN')}
                     comboboxProps={{ withinPortal: false }}
                   />
                   <Button variant="default" onClick={fetchComplaints} loading={complaintsLoading}>
-                    Refresh
+                    Обновить
                   </Button>
                 </Group>
 
                 {complaintsError && <Text c="red" size="sm">{complaintsError}</Text>}
                 {complaintsLoading ? (
-                  <Text c="dimmed">Loading…</Text>
+                  <Text c="dimmed">Загрузка...</Text>
                 ) : complaints.length === 0 ? (
-                  <Text c="dimmed">No complaints.</Text>
+                  <Text c="dimmed">Жалоб нет.</Text>
                 ) : (
                   <div className="adminTableWrap">
                     <Table striped highlightOnHover>
                       <Table.Thead>
                         <Table.Tr>
                           <Table.Th>ID</Table.Th>
-                          <Table.Th>Status</Table.Th>
-                          <Table.Th>Reporter</Table.Th>
-                          <Table.Th>Target</Table.Th>
-                          <Table.Th>Reason</Table.Th>
-                          <Table.Th>Actions</Table.Th>
+                          <Table.Th>Статус</Table.Th>
+                          <Table.Th>Автор жалобы</Table.Th>
+                          <Table.Th>Цель</Table.Th>
+                          <Table.Th>Причина</Table.Th>
+                          <Table.Th>Действия</Table.Th>
                         </Table.Tr>
                       </Table.Thead>
                       <Table.Tbody>
@@ -382,7 +383,7 @@ export default function Admin() {
                           <Table.Tr key={c.id}>
                             <Table.Td>#{c.id}</Table.Td>
                             <Table.Td>
-                              <Badge variant="light" color={badgeColorForStatus(c.status)}>{c.status}</Badge>
+                              <Badge variant="light" color={badgeColorForStatus(c.status)}>{formatStatus(c.status)}</Badge>
                             </Table.Td>
                             <Table.Td>
                               {c.reporterUsername ? (
@@ -405,7 +406,7 @@ export default function Admin() {
                                 {c.targetPostId && (
                                   <Badge variant="light" color="gray">
                                     <Link to={`/posts/${c.targetPostId}`} className="inlineLink">
-                                      task #{c.targetPostId}
+                                      задание #{c.targetPostId}
                                     </Link>
                                   </Badge>
                                 )}
@@ -417,11 +418,11 @@ export default function Admin() {
                             <Table.Td>
                               <Group gap="xs">
                                 <Button size="xs" variant="light" color="violet" onClick={() => openResolve(c)}>
-                                  Resolve
+                                  Обработать
                                 </Button>
                                 {c.targetPostId && (
                                   <Button size="xs" variant="default" color="red" onClick={() => handleDeletePost(c.targetPostId)}>
-                                    Delete task
+                                    Удалить задание
                                   </Button>
                                 )}
                               </Group>

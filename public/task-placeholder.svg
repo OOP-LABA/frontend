@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-label="Studylance task placeholder">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-label="Заглушка изображения задания Studylance">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#0b0e14"/>
@@ -26,7 +26,7 @@
   <rect x="170" y="350" width="180" height="42" rx="14" fill="url(#accent)" opacity="0.9"/>
 
   <text x="170" y="420" fill="rgba(255,255,255,0.55)" font-family="Roboto, system-ui, -apple-system, Segoe UI, sans-serif" font-size="18">
-    No attachment provided
+    Вложение не добавлено
   </text>
   <text x="760" y="420" fill="rgba(255,255,255,0.7)" font-family="Roboto, system-ui, -apple-system, Segoe UI, sans-serif" font-size="18" text-anchor="end">
     Studylance

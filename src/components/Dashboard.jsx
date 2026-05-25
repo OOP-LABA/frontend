@@ -5,6 +5,7 @@ import Header from './Header';
 import AuthenticationTitle from './Auth.jsx';
 import api from '../axios.js';
 import { Link } from 'react-router-dom';
+import { formatCategory, formatNumber, formatStatus } from '../i18n.js';
 
 export default function Dashboard() {
   const isLoggedIn = useSelector(state => state.app.isLoggedIn);
@@ -30,7 +31,7 @@ export default function Dashboard() {
         setPosts(Array.isArray(res.data) ? res.data : []);
       } catch (e) {
         if (!mounted) return;
-        setError(e?.response?.data?.message || 'Failed to load tasks');
+        setError(e?.response?.data?.message || 'Не удалось загрузить задания');
         setPosts([]);
       } finally {
         if (mounted) setLoading(false);
@@ -80,8 +81,7 @@ export default function Dashboard() {
   };
 
   const formatMoney = (value) => {
-    const n = Number(value) || 0;
-    return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    return formatNumber(value);
   };
 
   if (!isLoggedIn) return <AuthenticationTitle />;
@@ -92,14 +92,14 @@ export default function Dashboard() {
       <Container size="lg" className="dashboardPage">
         <Group justify="space-between" align="flex-end" mb="md">
           <div>
-            <Title order={2}>Dashboard</Title>
+            <Title order={2}>Личный кабинет</Title>
             <Text c="dimmed" size="sm">
-              Your tasks and assignments.
+              Ваши задания и отклики в одном месте.
             </Text>
           </div>
           {isAdmin && (
             <Button variant="default" component={Link} to="/admin">
-              Open admin
+              Открыть админку
             </Button>
           )}
         </Group>
@@ -107,30 +107,30 @@ export default function Dashboard() {
         <Paper withBorder radius="lg" p="md" className="dashboardCard">
           <Group justify="space-between" align="flex-end" mb="sm" wrap="wrap">
             <TextInput
-              label="Search"
-              placeholder="Title / description / subject"
+              label="Поиск"
+              placeholder="Название / описание / предмет"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="dashboardSearch"
             />
             <Button variant="default" component={Link} to="/posts">
-              Browse all tasks
+              Все задания
             </Button>
           </Group>
 
           <Tabs value={tab} onChange={(v) => setTab(v || 'posted')}>
             <Tabs.List>
-              <Tabs.Tab value="posted">Posted by me ({mine.length})</Tabs.Tab>
-              <Tabs.Tab value="assigned">Assigned to me ({assigned.length})</Tabs.Tab>
+              <Tabs.Tab value="posted">Мои задания ({mine.length})</Tabs.Tab>
+              <Tabs.Tab value="assigned">Я исполнитель ({assigned.length})</Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value="posted" pt="md">
               {loading ? (
-                <Text c="dimmed">Loading…</Text>
+                <Text c="dimmed">Загрузка...</Text>
               ) : error ? (
                 <Text c="red">{error}</Text>
               ) : filtered.length === 0 ? (
-                <Text c="dimmed">No tasks here.</Text>
+                <Text c="dimmed">Здесь пока нет заданий.</Text>
               ) : (
                 <div className="dashboardList">
                   {filtered.map((p) => (
@@ -142,11 +142,11 @@ export default function Dashboard() {
                             {p.content}
                           </Text>
                           <Text size="sm" c="dimmed" mt={6}>
-                            Budget: <Text span fw={700}>{formatMoney(p.goal)}</Text>
+                            Бюджет: <Text span fw={700}>{formatMoney(p.goal)}</Text>
                           </Text>
                           {p.executorUsername && (
                             <Text size="sm" c="dimmed" mt={4}>
-                              Executor:{' '}
+                              Исполнитель:{' '}
                               <Link to={`/profiles/${p.executorUsername}`} className="inlineLink">
                                 {p.executorUsername}
                               </Link>
@@ -154,13 +154,13 @@ export default function Dashboard() {
                           )}
                         </div>
                         <Group gap="xs">
-                          {p.category && <Badge variant="light" color="violet">{p.category}</Badge>}
-                          {p.status && <Badge variant="light" color={statusColor(p.status)}>{p.status}</Badge>}
+                          {p.category && <Badge variant="light" color="violet">{formatCategory(p.category)}</Badge>}
+                          {p.status && <Badge variant="light" color={statusColor(p.status)}>{formatStatus(p.status)}</Badge>}
                         </Group>
                       </Group>
                       <Group justify="flex-end" mt="sm">
                         <Button size="xs" color="violet" variant="light" component={Link} to={`/posts/${p.id}`}>
-                          Open
+                          Открыть
                         </Button>
                       </Group>
                     </Paper>
@@ -171,11 +171,11 @@ export default function Dashboard() {
 
             <Tabs.Panel value="assigned" pt="md">
               {loading ? (
-                <Text c="dimmed">Loading…</Text>
+                <Text c="dimmed">Загрузка...</Text>
               ) : error ? (
                 <Text c="red">{error}</Text>
               ) : filtered.length === 0 ? (
-                <Text c="dimmed">No assigned tasks yet.</Text>
+                <Text c="dimmed">Вас пока не назначили исполнителем.</Text>
               ) : (
                 <div className="dashboardList">
                   {filtered.map((p) => (
@@ -187,11 +187,11 @@ export default function Dashboard() {
                             {p.content}
                           </Text>
                           <Text size="sm" c="dimmed" mt={6}>
-                            Budget: <Text span fw={700}>{formatMoney(p.goal)}</Text>
+                            Бюджет: <Text span fw={700}>{formatMoney(p.goal)}</Text>
                           </Text>
                           {p.authorUsername && (
                             <Text size="sm" c="dimmed" mt={4}>
-                              Owner:{' '}
+                              Автор:{' '}
                               <Link to={`/profiles/${p.authorUsername}`} className="inlineLink">
                                 {p.authorUsername}
                               </Link>
@@ -199,13 +199,13 @@ export default function Dashboard() {
                           )}
                         </div>
                         <Group gap="xs">
-                          {p.category && <Badge variant="light" color="violet">{p.category}</Badge>}
-                          {p.status && <Badge variant="light" color={statusColor(p.status)}>{p.status}</Badge>}
+                          {p.category && <Badge variant="light" color="violet">{formatCategory(p.category)}</Badge>}
+                          {p.status && <Badge variant="light" color={statusColor(p.status)}>{formatStatus(p.status)}</Badge>}
                         </Group>
                       </Group>
                       <Group justify="flex-end" mt="sm">
                         <Button size="xs" color="violet" variant="light" component={Link} to={`/posts/${p.id}`}>
-                          Open
+                          Открыть
                         </Button>
                       </Group>
                     </Paper>

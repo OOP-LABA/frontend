@@ -46,25 +46,25 @@ import {
       <Header></Header>
       <Container size={420} my={40}>
         <Title ta="center" className={classes.title}>
-          Welcome to Studylance
+          Добро пожаловать в Studylance
         </Title>
         <Text c="dimmed" size="sm" ta="center" mt={5}>
-          Sign in to browse tasks and post your own.{' '}
+          Войдите, чтобы смотреть задания и публиковать свои.{' '}
         </Text>
         <Text c="dimmed" size="sm" ta="center" mt={5}>
-          Do not have an account yet?{' '}
+          Еще нет аккаунта?{' '}
           <Link to={"/signup"}>
           <Anchor size="sm" component="button">
-            Create account
+            Создать аккаунт
           </Anchor>
           </Link>
         </Text>
   
         <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-          <TextInput label="Username" placeholder="User123" required onChange={e => handleChange("username", e.target.value)} value={fields['username']}/>
-          <PasswordInput label="Password" placeholder="Your password" required mt="md" onChange={e => handleChange("password", e.target.value)} value={fields['password']}/>
+          <TextInput label="Логин" placeholder="User123" required onChange={e => handleChange("username", e.target.value)} value={fields['username']}/>
+          <PasswordInput label="Пароль" placeholder="Ваш пароль" required mt="md" onChange={e => handleChange("password", e.target.value)} value={fields['password']}/>
           <Group justify="space-between" mt="lg">
-            <Checkbox label="Remember me" />
+            <Checkbox label="Запомнить меня" />
           </Group>
           {status === 'failed' && (
             <Text mt="sm" c="red" size="sm">
@@ -72,7 +72,7 @@ import {
             </Text>
           )}
           <Button fullWidth mt="xl" color='violet' onClick={handleLogin}>
-            Sign in
+            Войти
           </Button>
         </Paper>
       </Container>

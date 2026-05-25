@@ -16,6 +16,7 @@ import Header from './Header';
 import classes from '../AuthenticationTitle.module.css';
 import Modal from './Modal'
 import api from '../axios.js';
+import { formatCity } from '../i18n.js';
 export default function AuthenticationTitle() {
   const [fields, setFields] = React.useState({
     username: '',
@@ -38,7 +39,7 @@ export default function AuthenticationTitle() {
         const response = await api.get('cities');
         if (!mounted) return;
         const list = Array.isArray(response.data) ? response.data : [];
-        setCityOptions(list.map(c => ({ value: c.name, label: c.name })));
+        setCityOptions(list.map(c => ({ value: c.name, label: formatCity(c.name) })));
       } catch (e) {
         console.warn('Failed to load cities', e);
       }
@@ -71,15 +72,15 @@ export default function AuthenticationTitle() {
       <Header />
       <Container size={420} my={40}>
         <Title ta="center" className={classes.title}>
-          Create your account
+          Создайте аккаунт
         </Title>
 
         <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-          <TextInput label="Username" placeholder="User123" required onChange={e => handleChange("username", e.target.value)} value={fields.username} />
+          <TextInput label="Логин" placeholder="User123" required onChange={e => handleChange("username", e.target.value)} value={fields.username} />
           {cityOptions.length > 0 ? (
             <Select
-              label="City"
-              placeholder="Select a city"
+              label="Город"
+              placeholder="Выберите город"
               searchable
               required
               mt="md"
@@ -90,24 +91,24 @@ export default function AuthenticationTitle() {
             />
           ) : (
             <TextInput
-              label="City"
-              placeholder="Moscow"
+              label="Город"
+              placeholder="Москва"
               required
               mt="md"
               onChange={e => handleChange("city", e.target.value)}
               value={fields.city}
             />
           )}
-          <TextInput label="First name" placeholder="Andrew" required onChange={e => handleChange("firstName", e.target.value)} value={fields.firstName} />
-          <TextInput label="Second name" placeholder="Watskov" required onChange={e => handleChange("secondName", e.target.value)} value={fields.secondName} />
-          <TextInput label="Email" placeholder="you@mail.ru" required onChange={e => handleChange("email", e.target.value)} value={fields.email} />
-          <PasswordInput label="Password" placeholder="Your password" required mt="md" onChange={e => handleChange("password", e.target.value)} value={fields.password} />
+          <TextInput label="Имя" placeholder="Андрей" required onChange={e => handleChange("firstName", e.target.value)} value={fields.firstName} />
+          <TextInput label="Фамилия" placeholder="Вацков" required onChange={e => handleChange("secondName", e.target.value)} value={fields.secondName} />
+          <TextInput label="Почта" placeholder="you@mail.ru" required onChange={e => handleChange("email", e.target.value)} value={fields.email} />
+          <PasswordInput label="Пароль" placeholder="Ваш пароль" required mt="md" onChange={e => handleChange("password", e.target.value)} value={fields.password} />
           
-          {status === 'loading' && <Text>Loading...</Text>}
+          {status === 'loading' && <Text>Загрузка...</Text>}
           {status === 'failed' && <Text color="red">{JSON.stringify(error)}</Text>}
 
           <Button fullWidth mt="xl" color='violet' onClick={handleRegister}>
-            Sign up
+            Зарегистрироваться
           </Button>
         </Paper>
       </Container>

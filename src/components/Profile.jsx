@@ -4,6 +4,7 @@ import { Button, Container, Group, Paper, Select, Text, TextInput, Textarea, Tit
 import Header from './Header';
 import AuthenticationTitle from './Auth.jsx';
 import api from '../axios.js';
+import { formatCity, formatReviewsCount } from '../i18n.js';
 
 export default function Profile() {
   const isLoggedIn = useSelector(state => state.app.isLoggedIn);
@@ -53,9 +54,9 @@ export default function Profile() {
         setRatingCount(typeof profile?.ratingCount === 'number' ? profile.ratingCount : 0);
 
         const list = Array.isArray(citiesRes.data) ? citiesRes.data : [];
-        setCities(list.map((c) => ({ value: c.name, label: c.name })));
+        setCities(list.map((c) => ({ value: c.name, label: formatCity(c.name) })));
       } catch (e) {
-        const message = e?.response?.data?.message || 'Failed to load profile';
+        const message = e?.response?.data?.message || 'Не удалось загрузить профиль';
         setError(message);
       } finally {
         setLoading(false);
@@ -104,18 +105,18 @@ export default function Profile() {
       <Container size="md" className="profilePage">
         <Group justify="space-between" align="flex-end" mb="md">
           <div>
-            <Title order={2}>Resume</Title>
+            <Title order={2}>Резюме</Title>
             <Text c="dimmed" size="sm">
-              This is your public profile + resume (stored in the backend).
+              Это ваш публичный профиль, который видят заказчики и исполнители.
             </Text>
           </div>
           <Button color="violet" onClick={handleSave}>
-            {savedState === 'saved' ? 'Saved' : 'Save'}
+            {savedState === 'saved' ? 'Сохранено' : 'Сохранить'}
           </Button>
         </Group>
 
         {loading ? (
-          <Text c="dimmed">Loading profile…</Text>
+          <Text c="dimmed">Загружаем профиль...</Text>
         ) : error ? (
           <Text c="red">{error}</Text>
         ) : null}
@@ -124,22 +125,22 @@ export default function Profile() {
           <Paper withBorder radius="lg" p="md" className="profileCard">
             <Group grow>
               <TextInput
-                label="First name"
-                placeholder="Andrew"
+                label="Имя"
+                placeholder="Андрей"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
               <TextInput
-                label="Second name"
-                placeholder="Watskov"
+                label="Фамилия"
+                placeholder="Вацков"
                 value={secondName}
                 onChange={(e) => setSecondName(e.target.value)}
               />
             </Group>
 
             <Select
-              label="City"
-              placeholder="Select a city"
+              label="Город"
+              placeholder="Выберите город"
               mt="md"
               searchable
               data={cities}
@@ -149,16 +150,16 @@ export default function Profile() {
             />
 
             <TextInput
-              label="Headline"
-              placeholder="e.g. I solve math & programming tasks fast"
+              label="Заголовок"
+              placeholder="Например: быстро решаю задачи по математике и программированию"
               mt="md"
               value={headline}
               onChange={(e) => setHeadline(e.target.value)}
             />
 
             <Textarea
-              label="About"
-              placeholder="A few lines about your experience, tools, and what you’re good at."
+              label="О себе"
+              placeholder="Несколько строк об опыте, инструментах и том, в чем вы сильны."
               minRows={4}
               mt="md"
               value={about}
@@ -166,17 +167,17 @@ export default function Profile() {
             />
 
             <TextInput
-              label="Skills"
-              description="Comma-separated"
-              placeholder="Java, Calculus, Excel, SQL"
+              label="Навыки"
+              description="Через запятую"
+              placeholder="Java, математика, Excel, SQL"
               mt="md"
               value={skills}
               onChange={(e) => setSkills(e.target.value)}
             />
 
             <Textarea
-              label="Portfolio links"
-              placeholder="One link per line"
+              label="Ссылки на портфолио"
+              placeholder="Одна ссылка на строку"
               minRows={3}
               mt="md"
               value={portfolio}
@@ -184,9 +185,9 @@ export default function Profile() {
             />
 
             <TextInput
-              label="Contacts"
-              description="What you want to show on your profile (not the same as task contact field)."
-              placeholder="@telegram / discord / email"
+              label="Контакты"
+              description="То, что вы хотите показывать в профиле. Это не поле контакта конкретного задания."
+              placeholder="@telegram / Discord / почта"
               mt="md"
               value={contacts}
               onChange={(e) => setContacts(e.target.value)}
@@ -194,14 +195,14 @@ export default function Profile() {
           </Paper>
 
           <Paper withBorder radius="lg" p="md" className="profileCard">
-            <Text c="dimmed" size="sm">Preview</Text>
+            <Text c="dimmed" size="sm">Предпросмотр</Text>
             <Group justify="space-between" align="flex-start" mt={6}>
               <div>
                 <Title order={3}>{username}</Title>
                 {(firstName || secondName) && (
                   <Text c="dimmed" size="sm">
                     {[firstName, secondName].filter(Boolean).join(' ')}
-                    {city ? ` · ${city}` : ''}
+                    {city ? ` · ${formatCity(city)}` : ''}
                   </Text>
                 )}
               </div>
@@ -209,7 +210,7 @@ export default function Profile() {
                 <Text fw={700}>
                   {ratingAverage !== null ? ratingAverage.toFixed(1) : '—'} / 5
                 </Text>
-                <Text c="dimmed" size="xs">{ratingCount} reviews</Text>
+                <Text c="dimmed" size="xs">{formatReviewsCount(ratingCount)}</Text>
               </div>
             </Group>
             {headline && <Text fw={700} mt="sm">{headline}</Text>}
@@ -217,7 +218,7 @@ export default function Profile() {
 
             {previewSkills.length > 0 && (
               <>
-                <Text fw={700} mt="lg">Skills</Text>
+                <Text fw={700} mt="lg">Навыки</Text>
                 <div className="profileChips">
                   {previewSkills.map((s) => (
                     <span key={s} className="profileChip">{s}</span>
@@ -228,7 +229,7 @@ export default function Profile() {
 
             {portfolio.trim() && (
               <>
-                <Text fw={700} mt="lg">Portfolio</Text>
+                <Text fw={700} mt="lg">Портфолио</Text>
                 <Text c="dimmed" size="sm" className="profilePreviewText">
                   {portfolio}
                 </Text>
@@ -237,7 +238,7 @@ export default function Profile() {
 
             {contacts.trim() && (
               <>
-                <Text fw={700} mt="lg">Contacts</Text>
+                <Text fw={700} mt="lg">Контакты</Text>
                 <Text c="dimmed" size="sm" className="profilePreviewText">
                   {contacts}
                 </Text>

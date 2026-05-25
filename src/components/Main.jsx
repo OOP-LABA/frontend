@@ -16,20 +16,20 @@ export default function Main() {
         <Header />
 
         <section className="hero">
-          <img src={heroImage} alt="Studylance hero" className="heroImage" />
+          <img src={heroImage} alt="Главный экран Studylance" className="heroImage" />
           <div className="heroOverlay" />
 
           <div className="heroContent">
             <div className="heroBadge">Studylance</div>
-            <h1 className="heroTitle">Students post tasks. Solvers earn.</h1>
+            <h1 className="heroTitle">Студенты публикуют задания. Исполнители зарабатывают.</h1>
             <p className="heroSubtitle">
-              Submit your assignment, set a budget, and get it done by someone who can help — fast and simple.
+              Добавьте свое задание, укажите бюджет и найдите человека, который поможет быстро и без лишней суеты.
             </p>
 
             <div className="heroActions">
               <Link to="/posts" style={{ textDecoration: 'none' }}>
                 <Button size="lg" color="violet" variant="filled">
-                  Browse tasks
+                  Смотреть задания
                 </Button>
               </Link>
 
@@ -38,13 +38,13 @@ export default function Main() {
                 style={{ textDecoration: 'none' }}
               >
                 <Button size="lg" color="violet" variant="light">
-                  Post a task
+                  Опубликовать задание
                 </Button>
               </Link>
             </div>
 
             <div className="heroHint">
-              Tip: leave a Telegram/Discord handle in “Contact” so solvers can reach you.
+              Совет: оставьте Telegram, Discord или почту в поле контактов, чтобы исполнитель мог быстро связаться с вами.
             </div>
           </div>
         </section>
@@ -54,23 +54,23 @@ export default function Main() {
         <div className="sectionInner">
           <div className="featureGrid">
             <div className="featureCard">
-              <div className="featureTitle">Post your assignment</div>
-              <div className="featureText">Describe the task, attach a screenshot, and pick a category.</div>
+              <div className="featureTitle">Опишите задание</div>
+              <div className="featureText">Добавьте подробности, прикрепите скриншот и выберите предмет.</div>
             </div>
 
             <div className="featureCard">
-              <div className="featureTitle">Set a budget</div>
-              <div className="featureText">Use “Budget” as the fixed price you’re ready to pay.</div>
+              <div className="featureTitle">Укажите бюджет</div>
+              <div className="featureText">В поле «Бюджет» поставьте сумму, которую готовы заплатить за работу.</div>
             </div>
 
             <div className="featureCard">
-              <div className="featureTitle">Get it completed</div>
-              <div className="featureText">Solvers contact you and deliver the result. Keep it simple.</div>
+              <div className="featureTitle">Получите результат</div>
+              <div className="featureText">Исполнители откликаются, связываются с вами и доводят задачу до результата.</div>
             </div>
           </div>
 
           <div className="sectionMedia">
-            <img src={sectionImage} alt="Student working" className="sectionImage" />
+            <img src={sectionImage} alt="Студент за работой" className="sectionImage" />
           </div>
         </div>
       </section>

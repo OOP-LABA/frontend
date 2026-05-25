@@ -138,7 +138,7 @@ export const appSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload || 'Failed to login';
+        state.error = action.payload || 'Не удалось войти';
       })
       .addCase(register.pending, (state) => {
         state.status = 'loading';
@@ -154,7 +154,7 @@ export const appSlice = createSlice({
       })
       .addCase(register.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.payload || 'Failed to register';
+        state.error = action.payload || 'Не удалось зарегистрироваться';
       })
       .addCase(post.pending, (state) => {
         state.status = 'loading';

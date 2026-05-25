@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { Badge, Button, Container, Group, Modal, Paper, Text, Textarea, Title } from '@mantine/core';
 import Header from './Header';
 import api from '../axios.js';
+import { formatCity, formatDateTime, formatReviewsCount } from '../i18n.js';
 
 export default function PublicProfile() {
   const { username } = useParams();
@@ -35,7 +36,7 @@ export default function PublicProfile() {
         setProfile(profileRes.data || null);
         setReviews(Array.isArray(reviewsRes.data) ? reviewsRes.data : []);
       } catch (e) {
-        const message = e?.response?.data?.message || 'Failed to load profile';
+        const message = e?.response?.data?.message || 'Не удалось загрузить профиль';
         setError(message);
       } finally {
         setLoading(false);
@@ -63,7 +64,7 @@ export default function PublicProfile() {
       setReportOpened(false);
       setReportReason('');
     } catch (e) {
-      const message = e?.response?.data?.message || 'Failed to submit complaint';
+      const message = e?.response?.data?.message || 'Не удалось отправить жалобу';
       setReportState({ sending: false, error: message });
       return;
     }
@@ -75,10 +76,10 @@ export default function PublicProfile() {
     <>
       <Header />
 
-      <Modal opened={reportOpened} onClose={() => setReportOpened(false)} title="Report user" centered>
+      <Modal opened={reportOpened} onClose={() => setReportOpened(false)} title="Пожаловаться на пользователя" centered>
         <Textarea
-          label="Reason"
-          placeholder="Describe what happened"
+          label="Причина"
+          placeholder="Опишите, что произошло"
           minRows={4}
           value={reportReason}
           onChange={(e) => setReportReason(e.target.value)}
@@ -89,20 +90,20 @@ export default function PublicProfile() {
           </Text>
         )}
         <Group justify="flex-end" mt="md">
-          <Button variant="default" onClick={() => setReportOpened(false)}>Cancel</Button>
+          <Button variant="default" onClick={() => setReportOpened(false)}>Отмена</Button>
           <Button color="violet" onClick={handleReport} loading={reportState.sending} disabled={!reportReason.trim()}>
-            Submit
+            Отправить
           </Button>
         </Group>
       </Modal>
 
       <Container size="md" className="profilePage">
         {loading ? (
-          <Text c="dimmed">Loading profile…</Text>
+          <Text c="dimmed">Загружаем профиль...</Text>
         ) : error ? (
           <Text c="red">{error}</Text>
         ) : !profile ? (
-          <Text c="dimmed">Profile not found.</Text>
+          <Text c="dimmed">Профиль не найден.</Text>
         ) : (
           <>
             <Group justify="space-between" align="flex-start" mb="md">
@@ -110,7 +111,7 @@ export default function PublicProfile() {
                 <Title order={2}>{profile.username}</Title>
                 <Text c="dimmed" size="sm">
                   {[profile.firstName, profile.secondName].filter(Boolean).join(' ')}
-                  {profile.city ? ` · ${profile.city}` : ''}
+                  {profile.city ? ` · ${formatCity(profile.city)}` : ''}
                 </Text>
               </div>
 
@@ -120,10 +121,10 @@ export default function PublicProfile() {
                     ? `${Number(profile.ratingAverage).toFixed(1)} / 5`
                     : '— / 5'}
                 </Badge>
-                <Badge variant="light" color="gray">{profile.ratingCount ?? 0} reviews</Badge>
+                <Badge variant="light" color="gray">{formatReviewsCount(profile.ratingCount ?? 0)}</Badge>
                 {canReport && (
                   <Button variant="default" color="gray" onClick={() => setReportOpened(true)}>
-                    Report
+                    Пожаловаться
                   </Button>
                 )}
               </Group>
@@ -136,7 +137,7 @@ export default function PublicProfile() {
 
                 {skills.length > 0 && (
                   <>
-                    <Text fw={700} mt="lg">Skills</Text>
+                    <Text fw={700} mt="lg">Навыки</Text>
                     <div className="profileChips">
                       {skills.map((s) => (
                         <span key={s} className="profileChip">{s}</span>
@@ -147,7 +148,7 @@ export default function PublicProfile() {
 
                 {profile.portfolio && (
                   <>
-                    <Text fw={700} mt="lg">Portfolio</Text>
+                    <Text fw={700} mt="lg">Портфолио</Text>
                     <Text c="dimmed" size="sm" className="profilePreviewText">
                       {profile.portfolio}
                     </Text>
@@ -156,7 +157,7 @@ export default function PublicProfile() {
 
                 {profile.contacts && (
                   <>
-                    <Text fw={700} mt="lg">Contacts</Text>
+                    <Text fw={700} mt="lg">Контакты</Text>
                     <Text c="dimmed" size="sm" className="profilePreviewText">
                       {profile.contacts}
                     </Text>
@@ -166,12 +167,12 @@ export default function PublicProfile() {
 
               <Paper withBorder radius="lg" p="md" className="profileCard">
                 <Group justify="space-between" align="center">
-                  <Text fw={800}>Reviews</Text>
+                  <Text fw={800}>Отзывы</Text>
                   <Text c="dimmed" size="sm">{reviews.length}</Text>
                 </Group>
 
                 {reviews.length === 0 ? (
-                  <Text c="dimmed" size="sm" mt="sm">No reviews yet.</Text>
+                  <Text c="dimmed" size="sm" mt="sm">Отзывов пока нет.</Text>
                 ) : (
                   <div className="reviewsList">
                     {reviews.map((r) => (
@@ -186,13 +187,13 @@ export default function PublicProfile() {
                             </Text>
                           </Group>
                           <Text size="xs" c="dimmed">
-                            {r.createdAt ? new Date(r.createdAt).toLocaleString() : ''}
+                            {formatDateTime(r.createdAt)}
                           </Text>
                         </Group>
                         {r.content && <Text mt={6} className="profilePreviewText">{r.content}</Text>}
                         {r.postId && (
                           <Text size="sm" c="dimmed" mt={6}>
-                            Task: <Link to={`/posts/${r.postId}`} className="inlineLink">#{r.postId}</Link>
+                            Задание: <Link to={`/posts/${r.postId}`} className="inlineLink">#{r.postId}</Link>
                           </Text>
                         )}
                       </Paper>
@@ -207,4 +208,3 @@ export default function PublicProfile() {
     </>
   );
 }
-
